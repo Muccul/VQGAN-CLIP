@@ -285,13 +285,14 @@ def vector_quantize(x, codebook):
 class Prompt(nn.Module):
     def __init__(self, embed, weight=1., stop=float('-inf')):
         super().__init__()
-        self.register_buffer('embed', embed)
-        self.register_buffer('weight', torch.as_tensor(weight))
-        self.register_buffer('stop', torch.as_tensor(stop))
+        self.register_buffer('embed', embed)   # [1,512]
+        self.register_buffer('weight', torch.as_tensor(weight))  # [1/0.5]
+        self.register_buffer('stop', torch.as_tensor(stop))  # [-inf]
 
     def forward(self, input):
-        input_normed = F.normalize(input.unsqueeze(1), dim=2)
-        embed_normed = F.normalize(self.embed.unsqueeze(0), dim=2)
+        # input [32,512]
+        input_normed = F.normalize(input.unsqueeze(1), dim=2)  # [32,1,512]
+        embed_normed = F.normalize(self.embed.unsqueeze(0), dim=2) # [1,1,512]
         dists = input_normed.sub(embed_normed).norm(dim=2).div(2).arcsin().pow(2).mul(2)
         dists = dists * self.weight.sign()
         return self.weight.abs() * replace_grad(dists, torch.maximum(dists, self.stop)).mean()
@@ -739,8 +740,7 @@ def checkin(i, losses):
 def ascend_txt():
     global i
     out = synth(z)
-    iii = perceptor.encode_image(normalize(make_cutouts(out))).float()
-    print('ii', iii.shape)
+    iii = perceptor.encode_image(normalize(make_cutouts(out))).float()   # [32, 512]
     
     result = []
 
