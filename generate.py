@@ -570,7 +570,7 @@ else:
     make_cutouts = MakeCutoutsPoolingUpdate(cut_size, args.cutn, cut_pow=args.cut_pow)    
 
 toksX, toksY = args.size[0] // f, args.size[1] // f   # 512/16=32
-sideX, sideY = toksX * f, toksY * f
+sideX, sideY = toksX * f, toksY * f  # 32*16=512
 
 # Gumbel or not?
 if gumbel:
@@ -583,9 +583,7 @@ else:
     n_toks = model.quantize.n_e
     z_min = model.quantize.embedding.weight.min(dim=0).values[None, :, None, None]
     z_max = model.quantize.embedding.weight.max(dim=0).values[None, :, None, None]
-
-    print('a2', e_dim, n_toks, model.quantize.embedding.weight.shape)
-
+    # model.quantize.embedding.weight [16384,256]
 
 if args.init_image:
     if 'http' in args.init_image:
@@ -616,7 +614,10 @@ else:
     else:
         z = one_hot @ model.quantize.embedding.weight
 
-    z = z.view([-1, toksY, toksX, e_dim]).permute(0, 3, 1, 2) 
+    print('a1', z.shape)
+    z = z.view([-1, toksY, toksX, e_dim]).permute(0, 3, 1, 2)
+    print('a2', z.shape)
+
     #z = torch.rand_like(z)*2						# NR: check
 
 z_orig = z.clone()
