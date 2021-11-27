@@ -554,6 +554,8 @@ perceptor = clip.load(args.clip_model, jit=jit)[0].eval().requires_grad_(False).
 cut_size = perceptor.visual.input_resolution
 f = 2**(model.decoder.num_resolutions - 1)
 
+print('a1:', cut_size, f)
+
 # Cutout class options:
 # 'latest','original','updated' or 'updatedpooling'
 if args.cut_method == 'latest':
