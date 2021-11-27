@@ -56,7 +56,7 @@ Or use the ```requirements.txt``` file, which includes version numbers.
 Clone required repositories:
 
 ```sh
-git clone 'https://github.com/nerdyrodent/VQGAN-CLIP'
+git clone 'https://github.com/Muccul/VQGAN-CLIP.git'
 cd VQGAN-CLIP
 git clone 'https://github.com/openai/CLIP'
 git clone 'https://github.com/CompVis/taming-transformers'
