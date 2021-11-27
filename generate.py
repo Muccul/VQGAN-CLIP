@@ -302,6 +302,7 @@ def split_prompt(prompt):
 
 class MakeCutouts(nn.Module):
     def __init__(self, cut_size, cutn, cut_pow=1.):
+        # cut_size=224 cutn=32
         super().__init__()
         self.cut_size = cut_size
         self.cutn = cutn
@@ -551,15 +552,14 @@ perceptor = clip.load(args.clip_model, jit=jit)[0].eval().requires_grad_(False).
 # perceptor.visual.positional_embedding.data = clock/clock.max()
 # perceptor.visual.positional_embedding.data=clamp_with_grad(clock,0,1)
 
-cut_size = perceptor.visual.input_resolution
-f = 2**(model.decoder.num_resolutions - 1)
+cut_size = perceptor.visual.input_resolution  # 224
+f = 2**(model.decoder.num_resolutions - 1)   # 16
 
-print('a1:', cut_size, f)
 
 # Cutout class options:
 # 'latest','original','updated' or 'updatedpooling'
 if args.cut_method == 'latest':
-    make_cutouts = MakeCutouts(cut_size, args.cutn, cut_pow=args.cut_pow)
+    make_cutouts = MakeCutouts(cut_size, args.cutn, cut_pow=args.cut_pow)  # cut_size=224 cutn=32   cut_pow=1.0
 elif args.cut_method == 'original':
     make_cutouts = MakeCutoutsOrig(cut_size, args.cutn, cut_pow=args.cut_pow)
 elif args.cut_method == 'updated':
@@ -569,7 +569,7 @@ elif args.cut_method == 'nrupdated':
 else:
     make_cutouts = MakeCutoutsPoolingUpdate(cut_size, args.cutn, cut_pow=args.cut_pow)    
 
-toksX, toksY = args.size[0] // f, args.size[1] // f
+toksX, toksY = args.size[0] // f, args.size[1] // f   # 512/16=32
 sideX, sideY = toksX * f, toksY * f
 
 # Gumbel or not?
@@ -583,6 +583,8 @@ else:
     n_toks = model.quantize.n_e
     z_min = model.quantize.embedding.weight.min(dim=0).values[None, :, None, None]
     z_max = model.quantize.embedding.weight.max(dim=0).values[None, :, None, None]
+
+    print('a2', e_dim, n_toks, model.quantize.embedding.weight.shape)
 
 
 if args.init_image:
