@@ -117,6 +117,10 @@ if args.prompts:
     
     # First phrase
     args.prompts = all_phrases[0]
+    """
+     "Castle in the air | psychedelic | surreal:0.5 | weird:0.25"
+    ['Castle in the air ', ' psychedelic ', ' surreal:0.5 ', ' weird:0.25']
+    """
     
 # Split target images using the pipe character (weights are split later)
 if args.image_prompts:
@@ -612,11 +616,11 @@ else:
     if gumbel:
         z = one_hot @ model.quantize.embed.weight
     else:
-        z = one_hot @ model.quantize.embedding.weight
+        z = one_hot @ model.quantize.embedding.weight  # [1024, 256]
 
-    print('a1', z.shape)
+    # [b,dim,h,w][1,256,32,32]
     z = z.view([-1, toksY, toksX, e_dim]).permute(0, 3, 1, 2)
-    print('a2', z.shape)
+
 
     #z = torch.rand_like(z)*2						# NR: check
 
@@ -635,7 +639,19 @@ normalize = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073],
 if args.prompts:
     for prompt in args.prompts:
         txt, weight, stop = split_prompt(prompt)
+        """
+        Castle in the air  1.0 -inf
+        *******
+         psychedelic  1.0 -inf
+        ********
+         surreal 0.5 -inf
+        ********
+         weird 0.25 -inf
+        ********
+        """
         embed = perceptor.encode_text(clip.tokenize(txt).to(device)).float()
+
+        print()
         pMs.append(Prompt(embed, weight, stop).to(device))
 
 for prompt in args.image_prompts:
