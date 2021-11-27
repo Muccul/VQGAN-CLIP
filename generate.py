@@ -649,9 +649,7 @@ if args.prompts:
          weird 0.25 -inf
         ********
         """
-        embed = perceptor.encode_text(clip.tokenize(txt).to(device)).float()
-
-        print('a11', embed.shape)
+        embed = perceptor.encode_text(clip.tokenize(txt).to(device)).float()  # [1,512]
         pMs.append(Prompt(embed, weight, stop).to(device))
 
 for prompt in args.image_prompts:
@@ -667,14 +665,13 @@ for seed, weight in zip(args.noise_prompt_seeds, args.noise_prompt_weights):
     gen = torch.Generator().manual_seed(seed)
     embed = torch.empty([1, perceptor.visual.output_dim]).normal_(generator=gen)
 
-    print('a2', gen, embed.shape)
     pMs.append(Prompt(embed, weight).to(device))
 
 
 # Set the optimiser
 def get_opt(opt_name, opt_lr):
     if opt_name == "Adam":
-        opt = optim.Adam([z], lr=opt_lr)	# LR=0.1 (Default)
+        opt = optim.Adam([z], lr=opt_lr)	# LR=0.1 (Default)    z:[[b,dim,h,w][1,256,32,32]]
     elif opt_name == "AdamW":
         opt = optim.AdamW([z], lr=opt_lr)	
     elif opt_name == "Adagrad":
@@ -743,6 +740,7 @@ def ascend_txt():
     global i
     out = synth(z)
     iii = perceptor.encode_image(normalize(make_cutouts(out))).float()
+    print('ii', iii.shape)
     
     result = []
 
