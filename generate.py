@@ -651,7 +651,7 @@ if args.prompts:
         """
         embed = perceptor.encode_text(clip.tokenize(txt).to(device)).float()
 
-        print()
+        print('a11', embed.shape)
         pMs.append(Prompt(embed, weight, stop).to(device))
 
 for prompt in args.image_prompts:
@@ -666,6 +666,8 @@ for prompt in args.image_prompts:
 for seed, weight in zip(args.noise_prompt_seeds, args.noise_prompt_weights):
     gen = torch.Generator().manual_seed(seed)
     embed = torch.empty([1, perceptor.visual.output_dim]).normal_(generator=gen)
+
+    print('a2', gen, embed.shape)
     pMs.append(Prompt(embed, weight).to(device))
 
 
